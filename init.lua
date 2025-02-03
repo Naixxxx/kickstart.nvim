@@ -157,6 +157,14 @@ vim.opt.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
 
+-- add 4 space thingy and some extra stuff for tabs so it looks nice
+vim.opt.tabstop = 4
+vim.opt.softtabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.expandtab = true
+
+-- what does vim.opt.smartindent do?
+
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
@@ -196,11 +204,21 @@ vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper win
 vim.keymap.set('n', '<C-d>', '<C-d>zz', { desc = 'Moves down and also centering cursor' })
 vim.keymap.set('n', '<C-u>', '<C-u>zz', { desc = 'Moves up and also centering cursor' })
 
---keymaps for moving between buffers
-vim.keymap.set('n', '<Tab-n>', ':tabnext<cr>', { desc = 'Goes to the next tab' })
-
 --toggle terminal
 vim.keymap.set('n', '<leader>p', ':new | terminal<CR>', { desc = 'Open up terminal' })
+
+-- Save and exit files
+vim.keymap.set('n', '<leader>mm', function()
+  vim.cmd 'w'
+end, { desc = 'Saves a file' })
+
+vim.keymap.set('n', '<leader>mb', function()
+  vim.cmd 'q'
+end, { desc = 'Quits a file' })
+
+-- In the middle cursor while searching
+vim.keymap.set('n', 'n', 'nzzzv', { desc = 'When looking for smth your curson is in the middle' })
+vim.keymap.set('n', 'N', 'Nzzzv', { desc = 'When looking for smth your curson is in the middle' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -425,6 +443,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
+      vim.keymap.set('n', '<leader>z', builtin.git_status, { desc = 'Searching for git status files' })
       -- perhaps delete the git files thingy
 
       -- Slightly advanced example of overriding default behavior and theme
@@ -947,11 +966,11 @@ require('lazy').setup({
   --  Here are some example plugins that I've included in the Kickstart repository.
   --  Uncomment any of the lines below to enable them (you will need to restart nvim).
   --
-  -- require 'kickstart.plugins.debug',
+  require 'kickstart.plugins.debug',
   -- require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
+  require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
   require 'kickstart.plugins.harpoon',
 

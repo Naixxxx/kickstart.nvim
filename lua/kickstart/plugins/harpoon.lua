@@ -10,9 +10,9 @@ return {
       harpoon:setup()
 
       -- Keymaps for Harpoon
-      vim.keymap.set('n', '<leader>a', function()
+      vim.keymap.set('n', '<leader>aa', function()
         harpoon:list():add()
-      end)
+      end, { desc = 'Adds a file into a harpoon list' })
       vim.keymap.set('n', '<C-e>', function()
         harpoon.ui:toggle_quick_menu(harpoon:list())
       end)
@@ -29,6 +29,11 @@ return {
       vim.keymap.set('n', '<C-s>', function()
         harpoon:list():select(4)
       end)
+
+      -- for removing a bookmark from the list for the future implement normal keybinds
+      vim.keymap.set('n', '<leader>ar', function()
+        harpoon:list():remove()
+      end, { desc = 'Removes a file from harpoon list' })
 
       -- Toggle previous & next buffers stored within Harpoon list
       vim.keymap.set('n', '<C-S-P>', function()
