@@ -165,6 +165,9 @@ vim.opt.expandtab = true
 
 -- what does vim.opt.smartindent do?
 
+-- Supposdely making a big cursor even in insert mode
+vim.opt.guicursor = ''
+
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
@@ -205,16 +208,24 @@ vim.keymap.set('n', '<C-d>', '<C-d>zz', { desc = 'Moves down and also centering 
 vim.keymap.set('n', '<C-u>', '<C-u>zz', { desc = 'Moves up and also centering cursor' })
 
 --toggle terminal
-vim.keymap.set('n', '<leader>p', ':new | terminal<CR>', { desc = 'Open up terminal' })
+vim.keymap.set('n', '<leader>tt', ':10new | terminal<CR>', { desc = 'Open up terminal' })
 
 -- Save and exit files
-vim.keymap.set('n', '<leader>mm', function()
+vim.keymap.set('n', '<leader>w', function()
   vim.cmd 'w'
 end, { desc = 'Saves a file' })
 
-vim.keymap.set('n', '<leader>mb', function()
+vim.keymap.set('n', '<leader>c', function()
   vim.cmd 'q'
-end, { desc = 'Quits a file' })
+end, { desc = 'Quits a window' })
+
+-- Closes current buffer
+vim.keymap.set('n', '<leader>bc', function()
+  vim.cmd 'bd'
+end, { desc = 'Closes current buffer' })
+
+-- Returns to netrw menu
+vim.keymap.set('n', '<leader>n', vim.cmd.Ex, { desc = 'Returns to .netrw' })
 
 -- In the middle cursor while searching
 vim.keymap.set('n', 'n', 'nzzzv', { desc = 'When looking for smth your curson is in the middle' })
@@ -346,13 +357,14 @@ require('lazy').setup({
 
       -- Document existing key chains
       spec = {
-        { '<leader>c', group = '[C]ode', mode = { 'n', 'x' } },
-        { '<leader>d', group = '[D]ocument' },
-        { '<leader>r', group = '[R]ename' },
         { '<leader>s', group = '[S]earch' },
-        { '<leader>w', group = '[W]orkspace' },
-        { '<leader>t', group = '[T]oggle' },
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
+        { '<leader>l', group = '[L]sp tools' },
+        { '<leader>d', group = '[D]ebugger tools' },
+        { '<leader>g', group = '[G]it' },
+        { '<leader>a', group = '[H]arpoon tools' },
+        { '<leader>t', group = '[T]erminal' },
+        { '<leader>b', group = '[B]uffers' },
       },
     },
   },
@@ -442,12 +454,12 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sd', builtin.diagnostics, { desc = '[S]earch [D]iagnostics' })
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
-      vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
-      vim.keymap.set('n', '<leader>z', builtin.git_status, { desc = 'Searching for git status files' })
+      vim.keymap.set('n', '<leader>bs', builtin.buffers, { desc = '[ ] Search existing buffers' })
+      vim.keymap.set('n', '<leader>gt', builtin.git_status, { desc = 'Searching for git status files' })
       -- perhaps delete the git files thingy
 
       -- Slightly advanced example of overriding default behavior and theme
-      vim.keymap.set('n', '<leader>/', function()
+      vim.keymap.set('n', '<leader>b/', function()
         -- You can pass additional configuration to Telescope to change the theme, layout, etc.
         builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
           winblend = 10,
@@ -559,23 +571,25 @@ require('lazy').setup({
           -- Jump to the type of the word under your cursor.
           --  Useful when you're not sure what type a variable is and you want to see
           --  the definition of its *type*, not where it was *defined*.
-          map('<leader>D', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
+          map('<leader>lD', require('telescope.builtin').lsp_type_definitions, 'Type [D]efinition')
 
           -- Fuzzy find all the symbols in your current document.
           --  Symbols are things like variables, functions, types, etc.
-          map('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
+          map('<leader>ld', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
 
           -- Fuzzy find all the symbols in your current workspace.
           --  Similar to document symbols, except searches over your entire project.
-          map('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
+          map('<leader>lw', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
 
           -- Rename the variable under your cursor.
           --  Most Language Servers support renaming across files, etc.
-          map('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
+          map('<leader>lr', vim.lsp.buf.rename, '[R]e[n]ame')
+
+          -- TODO: Make lR to rename across all buffers
 
           -- Execute a code action, usually your cursor needs to be on top of an error
           -- or a suggestion from your LSP for this to activate.
-          map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
+          map('<leader>lc', vim.lsp.buf.code_action, '[C]ode [A]ction', { 'n', 'x' })
 
           -- WARN: This is not Goto Definition, this is Goto Declaration.
           --  For example, in C this would take you to the header.
@@ -615,7 +629,7 @@ require('lazy').setup({
           --
           -- This may be unwanted, since they displace some of your code
           if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
-            map('<leader>th', function()
+            map('<leader>lh', function()
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
             end, '[T]oggle Inlay [H]ints')
           end
@@ -651,7 +665,7 @@ require('lazy').setup({
       local servers = {
         -- clangd = {},
         gopls = {},
-        -- pyright = {},
+        pyright = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -718,7 +732,7 @@ require('lazy').setup({
     cmd = { 'ConformInfo' },
     keys = {
       {
-        '<leader>f',
+        '<leader>bf',
         function()
           require('conform').format { async = true, lsp_format = 'fallback' }
         end,
@@ -749,7 +763,7 @@ require('lazy').setup({
         go = { 'gofmt' },
         -- not sure whether gofmt is needed really
         -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
+        python = { 'isort', 'black' },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
@@ -886,8 +900,32 @@ require('lazy').setup({
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
       vim.cmd.colorscheme 'tokyonight-night'
 
+      -- to change treesitter colours
+      -- vim.api.nvim_set_hl(0, '@identifier', { fg = '#D19A66', italic = false })
+      -- vim.api.nvim_set_hl(0, 'constructor', { fg = '#D19A66', italic = false })
+      -- vim.api.nvim_set_hl(0, '@type.qualifier', { fg = '#D19A66', italic = false })
+      -- vim.api.nvim_set_hl(0, '@lsp.type.keyword', { fg = '#D19A66', italic = false })
+      -- -- vim.api.nvim_set_hl(0, '@type_declaration', { fg = '#D19A66', italic = false })
+      -- красит типы
+      vim.api.nvim_set_hl(0, '@type.builtin', { fg = '#dfab25', italic = false })
+      -- vim.api.nvim_set_hl(0, '@type', { fg = '#dfab25', italic = false }) -- TODO: Красит Типы в желтый в полях например когда ты обращаешься к типу, но не меняет nil
+      -- vim.api.nvim_set_hl(0, '@nil', { fg = '#dfab25', italic = false })
+      -- vim.api.nvim_set_hl(0, '@structure', { fg = '#D19A66', italic = false })
+      -- vim.api.nvim_set_hl(0, '@lsp.type.struct', { fg = '#D19A66', italic = false })
+      -- vim.api.nvim_set_hl(0, '@lsp.type.keyword', { fg = '#D19A66', italic = false })
+      -- below is for the struct changes
+      -- vim.api.nvim_set_hl(0, '@keyword.type', { fg = '#dfab25', italic = false })
+      -- vim.api.nvim_set_hl(0, '@lsp.type.property', { fg = '#E06C75', italic = false })
+      -- vim.api.nvim_set_hl(0, '@field', { fg = '#E06C75', italic = false })
+      -- vim.api.nvim_set_hl(0, '@variable.member', { fg = '#E06C75', italic = false })
+      -- vim.api.nvim_set_hl(0, '@lsp.type.property', { fg = '#E06C75', italic = false })
+
       -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
+
+      -- adapts colorscheme to the one of your terminal
+      vim.cmd 'hi Normal ctermbg=NONE guibg=NONE'
+      vim.cmd 'hi NonText ctermbg=NONE guibg=NONE'
     end,
   },
 
@@ -937,7 +975,7 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'go' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'go', 'python' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -947,6 +985,9 @@ require('lazy').setup({
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
         additional_vim_regex_highlighting = { 'ruby' },
       },
+      -- playground = {
+      --   enable = true,
+      -- },
       indent = { enable = true, disable = { 'ruby' } },
     },
     -- There are additional nvim-treesitter modules that you can use to interact
@@ -973,6 +1014,7 @@ require('lazy').setup({
   require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
   require 'kickstart.plugins.harpoon',
+  require 'kickstart.plugins.vimbegood',
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.

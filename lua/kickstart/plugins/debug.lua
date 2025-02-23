@@ -55,19 +55,55 @@ return {
       desc = 'Debug: Step Out',
     },
     {
-      '<leader>b',
+      '<leader>db',
       function()
         require('dap').toggle_breakpoint()
       end,
       desc = 'Debug: Toggle Breakpoint',
     },
     {
-      '<leader>B',
+      '<leader>dB',
       function()
         require('dap').set_breakpoint(vim.fn.input 'Breakpoint condition: ')
       end,
       desc = 'Debug: Set Breakpoint',
     },
+    {
+      '<leader>dt',
+      function()
+        require('dap').terminate()
+      end,
+      desc = 'Debug: Terminate Current Session',
+    },
+    {
+      '<leader>dr',
+      function()
+        require('dap').restart()
+      end,
+      desc = 'Debug: Restart Session',
+    },
+    {
+      '<leader>dc',
+      function()
+        require('dap').run_to_cursor()
+      end,
+      desc = 'Debug: Run To Cursor',
+    },
+    {
+      '<leader>dw',
+      function()
+        require('dap').clear_breakpoints()
+      end,
+      desc = 'Debug: Clear Breakpoint',
+    },
+    {
+      '<leader>dq',
+      function()
+        require('dap').close()
+      end,
+      desc = 'Debug: I suspect its closing a session, but not sure check it out',
+    },
+    -- Perhaps also add the button to exit debug UI
     -- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
     {
       '<F7>',
@@ -75,6 +111,22 @@ return {
         require('dapui').toggle()
       end,
       desc = 'Debug: See last session result.',
+    },
+    {
+      '<leader>du',
+      function()
+        require('dapui').float_element('scopes', { enter = true }) -- WARN: Opens a window with varaibles kind of like whats in tjay debug vid on 7th min LOOKS LIKE GOOD SOLUTION TBF
+      end,
+      desc = 'Trying to reduce the scope thingy',
+    },
+    {
+      '<leader>df',
+      function()
+        local types_enabled = true
+        types_enabled = not types_enabled
+        require('dapui').update_render { max_type_length = types_enabled and -1 or 0 }
+      end,
+      desc = 'No freaking idea',
     },
   },
   config = function()
@@ -118,7 +170,49 @@ return {
           disconnect = '⏏',
         },
       },
+      layouts = {
+        {
+          elements = {
+            {
+
+              id = 'console',
+              size = 0.25,
+            },
+            {
+              id = 'breakpoints',
+              size = 0.25,
+            },
+            {
+              id = 'stacks',
+              size = 0.25,
+            },
+            {
+              id = 'watches',
+              size = 0.25,
+            },
+          },
+          position = 'left',
+          size = 40,
+        },
+        {
+          elements = { {
+            id = 'repl',
+            size = 0.5,
+          }, {
+            id = 'scopes',
+            size = 0.5,
+          } },
+          position = 'bottom',
+          size = 10,
+        },
+      },
     }
+
+    -- local types_enabled = true
+    -- local toggle_types = function ()
+    --   types_enabled = not types_enabled
+    --   dapui.update_render({max_type_length = types_enabled and -1 or 0})
+    -- end
 
     -- Change breakpoint icons
     -- vim.api.nvim_set_hl(0, 'DapBreak', { fg = '#e51400' })
@@ -135,6 +229,26 @@ return {
     dap.listeners.after.event_initialized['dapui_config'] = dapui.open
     dap.listeners.before.event_terminated['dapui_config'] = dapui.close
     dap.listeners.before.event_exited['dapui_config'] = dapui.close
+
+    -- dap.adapters.go = {
+    --   type = 'server',
+    --   port = '$(port)',
+    --   executable = {
+    --     command = 'dlv',
+    --     args = {'dap', '-l', '127.0.0.1:$(port)'}
+    --   }
+    -- }
+
+    dap.configurations.go = {
+      {
+        type = 'delve',
+        name = 'file',
+        request = 'launch',
+        program = '${file}',
+        outputMode = 'remote',
+        -- console = 'integratedTerminal',
+      },
+    }
 
     -- Install golang specific config
     require('dap-go').setup {
